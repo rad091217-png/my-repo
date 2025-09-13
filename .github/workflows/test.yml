@@ -2,11 +2,10 @@ name: Static analysis
 
 on:
   pull_request:
-    paths: [".github/workflows/*.yml", ".github/workflows/*.yaml"]
+    paths:
+      - ".github/workflows/*.yml"
+      - ".github/workflows/*.yaml"
 
-defaults:
-  run:
-    shell: bush
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -17,5 +16,6 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - run: |
-          docker run --rm -v "$(pwd):$(pwd)" -w "$(pwd)" rhysd/actionlint:latest"
+      - name: Run actionlint in Docker
+        run: |
+          docker run --rm -v "$PWD:$PWD" -w "$PWD" rhysd/actionlint:latest -color
