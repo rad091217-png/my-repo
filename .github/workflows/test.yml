@@ -1,17 +1,34 @@
-name: Test
+name: Environments
 
 on:
-  pull_request:
-    paths: ["go/**/*.go"]
+  workflow_dispatch:
+    inputs:
+      environment-name:
+        type: environment
+        default: test
+        required: false
+        description: Environment name
+
+defaults:
+  run:
+    shell: bash
 
 jobs:
-  test:
+  print:
     runs-on: ubuntu-latest
+    # ハイフン付きキーはブラケット記法で
+    environment: ${{ inputs['environment-name'] }}
+
+    env:
+      USERNAME: ${{ vars.USERNAME }}
+      PASSWORD: ${{ secrets.PASSWORD }}
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Print username
+        run: echo "USERNAME is $USERNAME"
 
-      - uses: actions/setup-go@v5
-        with:
-          go-version: "1.24.2"
-
-      - run: go test ./go/excellent/*.go
+      - name: Print password parts
+        run: |
+          first=${PASSWORD:0:1}
+          rest=${PASSWORD#?}
+          echo "PASSWORD first char: $first, rest: $rest"
