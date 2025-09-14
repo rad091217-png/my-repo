@@ -1,25 +1,34 @@
-name: Static analysis
+name: Environments
 
 on:
-  pull_request:
-    paths:
-      - ".github/workflows/*.yml"
-      - ".github/workflows/*.yaml"
+  workflow_dispatch:
+    inputs:
+      environment-name:
+        type: environment
+        default: test
+        required: false
+        description: Environment name
 
 defaults:
   run:
     shell: bash
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
-  lint:
+  print:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    # ハイフン付きキーはブラケット記法で
+    environment: ${{ inputs['environment-name'] }}
+
+    env:
+      USERNAME: ${{ vars.USERNAME }}
+      PASSWORD: ${{ secrets.PASSWORD }}
+
     steps:
-      - uses: actions/checkout@v4
-      - name: Run actionlint in Docker
+      - name: Print username
+        run: echo "USERNAME is $USERNAME"
+
+      - name: Print password parts
         run: |
-          docker run --rm -v "$PWD:$PWD" -w "$PWD" rhysd/actionlint:latest -color
+          first=${PASSWORD:0:1}
+          rest=${PASSWORD#?}
+          echo "PASSWORD first char: $first, rest: $rest"
